@@ -122,3 +122,7 @@ client_id=124232cb-ac07-49f0-af6f-cc12bfea035e
 &response_type=code
 &state=27f355f49788669a463f04e0a688f941f3bc082e
 ```
+
+## requests-oauthlib
+
+The [requests-oauthlib](https://requests-oauthlib.readthedocs.io/en/latest/index.html) has some really clean minimal examples. The example skip the database part of user management which is important for an applicaiton, but makes examples harder to follow. 
