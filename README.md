@@ -1,12 +1,23 @@
 # FastAPI Users playground
 
-## Bearer JWT 
+This repo contains several examples of user management and authentication.
 
-This example:
-- Frontend sends a bearer token in the request header
-- The token is a self-contained JWT (JSON Web Token) 
+- flask_requests_oauthlib: This is a very simple example of authenticating against 
+  an OAth2 on azure. It uses [flask] and the [requests_oauthlib](https://requests-oauthlib.readthedocs.io/en/latest/)
+- fastapi_users_db: Uses the [FastAPI-Users](https://fastapi-users.github.io/fastapi-users/latest/) library. This stores user info in a database. Users are authenticated against credentials stored in the database.
+- fastapi_users_oauth2: Uses the FastAPI-Users library. This authenticates users with azure using OAuth2 
 
-The username/credentials are checked and stored against a local sqlite database 
+## Azure Setup
+
+Setup an application in azure and add the web redirect uris. Generate a secret and 
+store it somewhere safe. 
+
+Screenshot of application in azure:
+![azure_app](azure_app.png)
+
+## Python Setup
+
+The setup steps are the same for all of the examples.
 
 setup virtualenv:
 ```
@@ -15,10 +26,39 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
+You also need the client secret from azure.
+```
+SET ENTRA_CLIENT_SECRET={client_secret}
+```
+
+## flask_requests_oauthlib
+
+To run:
+```
+cd flask_requests_oauthlib
+flask --app app run --debug --port=8000 --host=0.0.0.0
+```
+
+To test:
+- Visiting [http://localhost:8000/login](http://localhost:8000/login)
+- You get redirected to microsoft login page.
+- login to the microsoft page
+- You are then redirect to `localhost:8000/oauth-callback`
+- The flask app on localhost gets your user information from microsoft and displays
+  it as json in the browser
+
+## fastapi_users_db
+
+This example:
+- Frontend sends a bearer token in the request header
+- The token is a self-contained JWT (JSON Web Token) 
+
+The username/credentials are checked and stored against a local sqlite database 
+
 run:
 ```
-cd bearer_jwt
-fastapi dev
+cd fastapi_users_db
+python main.py
 ```
 
 Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
@@ -70,7 +110,7 @@ To create a superuser you have to edit the db directly:
 UPDATE user SET is_superuser=1 WHERE id=3
 ```
 
-## OATH2
+## fastapi_users_oauth2
 
 This example:
 - Frontend sends a bearer token in the request header
@@ -97,7 +137,7 @@ We can decode the id token to get a payload with user information like name and 
 
 The FastAPI-Users machinary also adds an entry in the db table `user` and `oauth_account`
 
-### Debug: Authentication with Entra
+## Debug: Authentication with Entra
 
 Use the [https://openidconnect.net/#](https://openidconnect.net/#) to debug.
 - Use the Discovery Document URL: `https://login.microsoftonline.com/{TENANT_ID}/v2.0/.well-known/openid-configuration` to fill in
@@ -122,7 +162,3 @@ client_id=124232cb-ac07-49f0-af6f-cc12bfea035e
 &response_type=code
 &state=27f355f49788669a463f04e0a688f941f3bc082e
 ```
-
-## requests-oauthlib
-
-The [requests-oauthlib](https://requests-oauthlib.readthedocs.io/en/latest/index.html) has some really clean minimal examples. The example skip the database part of user management which is important for an applicaiton, but makes examples harder to follow. 

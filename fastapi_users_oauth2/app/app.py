@@ -51,8 +51,10 @@ oauth2_authorize_callback = OAuth2AuthorizeCallback(oauth_client, "oauth-callbac
 @app.get("/oauth-callback", name="oauth-callback")
 async def oauth_callback(access_token_state=Depends(oauth2_authorize_callback)):
     print("oauth_callback")
-    pdb.set_trace()
+    # pdb.set_trace()
     token, state = access_token_state
+    print(token)
+    print(state)
     # Do something useful
 
 app.include_router(

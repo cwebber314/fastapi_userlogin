@@ -1,0 +1,309 @@
+{
+	"info": {
+		"_postman_id": "6fa32c6d-ec7b-4cfe-be3e-0ae373f02743",
+		"name": "fastapi_users_oauth",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "3752800",
+		"_collection_link": "https://crimson-rocket-514677.postman.co/workspace/9e7e336e-0715-4826-966e-95ec75167e39/collection/3752800-6fa32c6d-ec7b-4cfe-be3e-0ae373f02743?action=share&source=collection_link&creator=3752800"
+	},
+	"item": [
+		{
+			"name": "login-jwt",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var res = pm.response.json()\r",
+							"// console.log(res)\r",
+							"pm.collectionVariables.clear('token');\r",
+							"pm.collectionVariables.set('token', res.access_token);\r",
+							"// pm.collectionVariables.set('token', 'foo');"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "username",
+							"value": "king.arthur@camelot.bt",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "guinevere",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/auth/jwt/login",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"auth",
+						"jwt",
+						"login"
+					]
+				},
+				"description": "This endpoint is used to authenticate and obtain a JSON Web Token (JWT) for accessing protected resources.\n\n### Request Body\n\n- `username` (text): The username of the user.\n    \n- `password` (text): The password of the user.\n    \n\n### Response\n\nThe response is a JSON object with the following properties:\n\n- `access_token` (string): The JWT access token.\n    \n- `token_type` (string): The type of token.\n    \n\n``` json\n{\n    \"type\": \"object\",\n    \"properties\": {\n        \"access_token\": {\n            \"type\": \"string\"\n        },\n        \"token_type\": {\n            \"type\": \"string\"\n        }\n    }\n}\n\n ```"
+			},
+			"response": []
+		},
+		{
+			"name": "user-me",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/users/me",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"users",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "oauth-authorize",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var res = pm.response.json()\r",
+							"// console.log(res)\r",
+							"pm.collectionVariables.clear('token');\r",
+							"pm.collectionVariables.set('token', res.access_token);\r",
+							"// pm.collectionVariables.set('token', 'foo');"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/auth/entra/authorize?scopes=User.Read",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"auth",
+						"entra",
+						"authorize"
+					],
+					"query": [
+						{
+							"key": "scopes",
+							"value": "User.Read"
+						}
+					]
+				},
+				"description": "This endpoint is used to authenticate and obtain a JSON Web Token (JWT) for accessing protected resources.\n\n### Request Body\n\n- `username` (text): The username of the user.\n    \n- `password` (text): The password of the user.\n    \n\n### Response\n\nThe response is a JSON object with the following properties:\n\n- `access_token` (string): The JWT access token.\n    \n- `token_type` (string): The type of token.\n    \n\n``` json\n{\n    \"type\": \"object\",\n    \"properties\": {\n        \"access_token\": {\n            \"type\": \"string\"\n        },\n        \"token_type\": {\n            \"type\": \"string\"\n        }\n    }\n}\n\n ```"
+			},
+			"response": []
+		},
+		{
+			"name": "register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"king.arthur@camelot.bt\",\r\n    \"password\": \"guinevere\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/auth/register",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "oauth-callback",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var res = pm.response.json()\r",
+							"// console.log(res)\r",
+							"pm.collectionVariables.clear('token');\r",
+							"pm.collectionVariables.set('token', res.access_token);\r",
+							"// pm.collectionVariables.set('token', 'foo');"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "username",
+							"value": "king.arthur@camelot.bt",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "guinevere",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/auth/entra/callback",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"auth",
+						"entra",
+						"callback"
+					]
+				},
+				"description": "This endpoint is used to authenticate and obtain a JSON Web Token (JWT) for accessing protected resources.\n\n### Request Body\n\n- `username` (text): The username of the user.\n    \n- `password` (text): The password of the user.\n    \n\n### Response\n\nThe response is a JSON object with the following properties:\n\n- `access_token` (string): The JWT access token.\n    \n- `token_type` (string): The type of token.\n    \n\n``` json\n{\n    \"type\": \"object\",\n    \"properties\": {\n        \"access_token\": {\n            \"type\": \"string\"\n        },\n        \"token_type\": {\n            \"type\": \"string\"\n        }\n    }\n}\n\n ```"
+			},
+			"response": []
+		},
+		{
+			"name": "authenticated-route",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8000/authenticated-route",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"authenticated-route"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "graph api call",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://graph.microsoft.com/v1.0/me",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"v1.0",
+						"me"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "token",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5ZDZiYWM3Mi1lMmRjLTRhYTItOTcwMC02ZDRlZGVjNGVjNDUiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl0sImV4cCI6MTczNzEzNDk4OH0.YLRmyCfGRTrq57fWFiMeMf5FEkYd6YWEkG0Sw7ggreg"
+		}
+	]
+}
