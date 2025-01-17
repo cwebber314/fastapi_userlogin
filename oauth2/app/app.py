@@ -1,49 +1,41 @@
+"""
+We get a JWT token back from microsoft which has the email, name and other info 
+for the user. This comes back encrypted using RS256 and the public key from
+https://login.microsoftonline.com/d92c6fc3-4ea6-49b0-928e-66084caad3c6/discovery/v2.0/keys
+
+The get_id_email() fails because the callback from microsoft doesn't contain
+everything we care about. Add the scope User.Read to the authorization request to 
+make everything work
+"""
 from contextlib import asynccontextmanager
+from fastapi import Depends, FastAPI, Request
+from httpx_oauth.integrations.fastapi import OAuth2AuthorizeCallback
+from httpx_oauth.oauth2 import OAuth2
 
-from fastapi import Depends, FastAPI
+from starlette.middleware.base import BaseHTTPMiddleware
+import traceback
+import pdb 
 
-import os
 from app.db import User, create_db_and_tables
 from app.schemas import UserCreate, UserRead, UserUpdate
-from app.users import auth_backend, current_active_user, fastapi_users
-from fastapi import FastAPI, Depends
-from httpx_oauth.oauth2 import OAuth2
-from httpx_oauth.clients.microsoft import MicrosoftGraphOAuth2
-from httpx_oauth.integrations.fastapi import OAuth2AuthorizeCallback
-
-
-REDIRECT_URI = 'https://openidconnect.net/callback'
-# Called "OIDC Client ID" in openidconnect.net debugger
-CLIENT_ID = '124232cb-ac07-49f0-af6f-cc12bfea035e'
-# Called "OIDC Client Secret" in  openidconnect.net debugger
-CLIENT_SECRET = os.getenv('ENTRA_CLIENT_SECRET')
-# Called "Authorization Token Endpoint" in openidconnect.net debugger
-AUTHORIZE_ENDPOINT = 'https://login.microsoftonline.com/d92c6fc3-4ea6-49b0-928e-66084caad3c6/oauth2/v2.0/authorize'
-# Called "Token Endpoint" in openidconnect.net debugger
-ACCESS_TOKEN_ENDPOINT = 'https://login.microsoftonline.com/d92c6fc3-4ea6-49b0-928e-66084caad3c6/oauth2/v2.0/token'
-
-SCOPES = ['openid', 'email', 'profile']
-TENANT = 'd92c6fc3-4ea6-49b0-928e-66084caad3c6'
-# Note that refresh_token_endpoint and revoke_token_endpoint are optional
-# since not every services propose to refresh and revoke tokens.
-
-# Microsoft client
-client = MicrosoftGraphOAuth2(
-    CLIENT_ID,
-    CLIENT_SECRET,
-    TENANT,
-    SCOPES,
-    'client name'
+from app.users import (
+    SECRET,
+    auth_backend,
+    current_active_user,
+    fastapi_users,
+    oauth_client,
 )
 
-# Generic client
-# client = OAuth2(CLIENT_ID, 
-#                 CLIENT_SECRET, 
-#                 AUTHORIZE_ENDPOINT, 
-#                 ACCESS_TOKEN_ENDPOINT)
-
-oauth2_authorize_callback = OAuth2AuthorizeCallback(client, "oauth-callback")
-app = FastAPI()
+# async def attach_debugger_on_exception(request: Request, call_next):
+#     try:
+#         response = await call_next(request)
+#     except Exception:
+#         traceback.print_exc()
+#         # `set_trace` would create a breakpoint but the stack would stop here.
+#         # `post_mortem` sets the relevant context to be where the exception happened.
+#         import pdb
+#         pdb.post_mortem()
+#         raise
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -52,10 +44,21 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
+# app.add_middleware(BaseHTTPMiddleware, dispatch=attach_debugger_on_exception)
+
+oauth2_authorize_callback = OAuth2AuthorizeCallback(oauth_client, "oauth-callback")
+
+@app.get("/oauth-callback", name="oauth-callback")
+async def oauth_callback(access_token_state=Depends(oauth2_authorize_callback)):
+    print("oauth_callback")
+    pdb.set_trace()
+    token, state = access_token_state
+    # Do something useful
 
 app.include_router(
     fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["auth"]
 )
+
 app.include_router(
     fastapi_users.get_register_router(UserRead, UserCreate),
     prefix="/auth",
@@ -76,15 +79,13 @@ app.include_router(
     prefix="/users",
     tags=["users"],
 )
+app.include_router(
+    fastapi_users.get_oauth_router(oauth_client, auth_backend, SECRET),
+    prefix="/auth/entra",
+    tags=["auth"],
+)
+
 
 @app.get("/authenticated-route")
 async def authenticated_route(user: User = Depends(current_active_user)):
     return {"message": f"Hello {user.email}!"}
-
-@app.get("/oauth-callback", name="oauth-callback")
-async def oauth_callback(access_token_state=Depends(oauth2_authorize_callback)):
-    token, state = access_token_state
-    print("oauth_callback")
-    print(token)
-    print(state)
-    # Do something useful

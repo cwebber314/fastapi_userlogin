@@ -78,6 +78,25 @@ This example:
 
 The username/credentials are checked using OAuth2 using the HTTPX OAuth library instead of a database. 
 
+### Postman example
+
+GET the authorize route: `http://localhost:8000/auth/entra/authorize?scopes=User.Read`
+
+This returns a reponse like:
+```
+{
+    "authorization_url": "https://login.microsoftonline.com/d92c6fc3-4ea6-49b0-928e-66084caad3c6/oauth2/v2.0/authorize?response_type=code&client_id=124232cb-ac07-49f0-af6f-cc12bfea035e&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Fauth%2Fentra%2Fcallback&state=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJmYXN0YXBpLXVzZXJzOm9hdXRoLXN0YXRlIiwiZXhwIjoxNzM3MDk5MjA4fQ.xeLOlEuHw1LAm3yVJcXthCCYQi3C6o2rlrnxZeiHwyc&scope=User.Read&response_mode=query"
+}
+```
+
+If we open the authorization url in a browser windows we can complete the 
+sign in on the microsoft platform. After we login to microsoft, the microsoft 
+server calls POSTS to our callback URL `/auth/entra/callback` and returns an access token and id token.
+
+We can decode the id token to get a payload with user information like name and email.
+
+The FastAPI-Users machinary also adds an entry in the db table `user` and `oauth_account`
+
 ### Debug: Authentication with Entra
 
 Use the [https://openidconnect.net/#](https://openidconnect.net/#) to debug.
@@ -87,7 +106,7 @@ Use the [https://openidconnect.net/#](https://openidconnect.net/#) to debug.
     - Token Keys Endpoint
 - Tenant ID: Get this from azure, sometimes called the "Tenant ID" or "Directory (tenant) ID"
 - OIDC Client ID:  Get this from azure "Application (client) ID"
-- scope: `openid email profile`
+- scope: `openid email profile User.Read`
 - client secret: this is the *Value* for the secret in Entra - it's only available when you first create the secret.
   Note that it's not the secret ID (guid)
 
